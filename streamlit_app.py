@@ -1,40 +1,70 @@
-import altair as alt
-import numpy as np
 import pandas as pd
-import streamlit as st
+from textstat import textstat
+from collections import Counter
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.sentiment import SentimentIntensityAnalyzer
+from textblob import TextBlob
+import nltk
 
-"""
-# Welcome to Streamlit!
+# Download necessary NLTK data
+nltk.download('punkt')
+nltk.download('vader_lexicon')
+nltk.download('stopwords')
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Load the data
+df = pd.read_csv('your_file.csv')
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+# Define CTA, sales-y, and news-y words
+cta_words = ['buy', 'subscribe', 'join', 'sign up', 'download']
+salesy_words = ['deal', 'offer', 'discount', 'exclusive', 'limited']
+newsy_words = ['report', 'update', 'news', 'announcement', 'release']
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+# Initialize sentiment analyzer
+sia = SentimentIntensityAnalyzer()
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+# Function to analyze a single row of text
+def analyze_text(text):
+    # Tokenize and remove stopwords
+    tokens = word_tokenize(text.lower())
+    tokens = [word for word in tokens if word.isalpha() and word not in stopwords.words('english')]
+    
+    # Flesch-Kincaid score
+    fk_score = textstat.flesch_kincaid_grade(text)
+    
+    # Lexical diversity
+    lexical_diversity = len(set(tokens)) / len(tokens) if tokens else 0
+    
+    # Top-performing words
+    word_counts = Counter(tokens)
+    top_words = word_counts.most_common(10)
+    
+    # Top-performing CTA words
+    cta_counts = {word: tokens.count(word) for word in cta_words}
+    
+    # Sentiment analysis
+    sentiment = sia.polarity_scores(text)
+    
+    # Sales-y vs News-y words
+    salesy_count = sum(tokens.count(word) for word in salesy_words)
+    newsy_count = sum(tokens.count(word) for word in newsy_words)
+    
+    return {
+        'Flesch-Kincaid Score': fk_score,
+        'Lexical Diversity': lexical_diversity,
+        'Top Words': top_words,
+        'CTA Words': cta_counts,
+        'Sentiment': sentiment,
+        'Sales-y Count': salesy_count,
+        'News-y Count': newsy_count
+    }
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+# Apply the analysis to each row
+df['Analysis'] = df['text_column'].apply(analyze_text)
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+# Expand the analysis dictionary into separate columns
+analysis_df = df['Analysis'].apply(pd.Series)
+result_df = pd.concat([df, analysis_df], axis=1).drop(columns=['Analysis'])
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+# Save the result to a new CSV file
+result_df.to_csv('analyzed_data.csv', index=False)

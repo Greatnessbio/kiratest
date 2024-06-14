@@ -9,22 +9,8 @@ from textblob import TextBlob
 import streamlit as st
 import nltk
 
-# Function to download NLTK data if not already available
-def download_nltk_data():
-    nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
-    if not os.path.exists(nltk_data_path):
-        os.makedirs(nltk_data_path)
-    nltk.data.path.append(nltk_data_path)
-    
-    resources = ['punkt', 'vader_lexicon', 'stopwords']
-    for resource in resources:
-        try:
-            nltk.data.find(f'{resource}')
-        except LookupError:
-            nltk.download(resource, download_dir=nltk_data_path)
-
-# Download NLTK data
-download_nltk_data()
+# Set the NLTK data path to the local directory
+nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'nltk_data'))
 
 # Function to analyze a single row of text
 def analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, sia):

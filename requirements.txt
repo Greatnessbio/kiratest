@@ -1,3 +1,6 @@
 altair
 pandas
 streamlit
+textstat
+nltk
+textblob

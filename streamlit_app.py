@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from nltk.sentiment import SentimentIntensityAnalyzer
 from textblob import TextBlob
 import streamlit as st
+import nltk
 
 # Function to analyze a single row of text
 def analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, sia):
@@ -63,8 +64,12 @@ def main():
         newsy_words = st.text_input("Enter news-y words separated by commas", "report,update,news,announcement,release").split(',')
         custom_stopwords = st.text_input("Enter additional stop words separated by commas", "").split(',')
         
-        # Combine custom stopwords with default NLTK stopwords
-        custom_stopwords = set(custom_stopwords) | set(stopwords.words('english'))
+        try:
+            # Combine custom stopwords with default NLTK stopwords
+            custom_stopwords = set(custom_stopwords) | set(stopwords.words('english'))
+        except LookupError:
+            st.error("NLTK stopwords data not found. Please ensure the NLTK data is downloaded and available.")
+            return
         
         # Initialize sentiment analyzer
         sia = SentimentIntensityAnalyzer()

@@ -5,12 +5,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.sentiment import SentimentIntensityAnalyzer
 from textblob import TextBlob
-import nltk
-
-# Download necessary NLTK data
-nltk.download('punkt')
-nltk.download('vader_lexicon')
-nltk.download('stopwords')
+import streamlit as st
 
 # Function to analyze a single row of text
 def analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, sia):
@@ -50,34 +45,48 @@ def analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, s
 
 # Main function to load data and perform analysis
 def main():
-    # Prompt user for input
-    file_path = input("Enter the path to the CSV file: ")
-    text_column = input("Enter the name of the column containing text data: ")
+    st.title("Text Analysis Tool")
     
-    cta_words = input("Enter CTA words separated by commas: ").split(',')
-    salesy_words = input("Enter sales-y words separated by commas: ").split(',')
-    newsy_words = input("Enter news-y words separated by commas: ").split(',')
-    custom_stopwords = input("Enter additional stop words separated by commas: ").split(',')
+    # File uploader
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
-    # Combine custom stopwords with default NLTK stopwords
-    custom_stopwords = set(custom_stopwords) | set(stopwords.words('english'))
-    
-    # Load the data
-    df = pd.read_csv(file_path)
-    
-    # Initialize sentiment analyzer
-    sia = SentimentIntensityAnalyzer()
-    
-    # Apply the analysis to each row
-    df['Analysis'] = df[text_column].apply(lambda text: analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, sia))
-    
-    # Expand the analysis dictionary into separate columns
-    analysis_df = df['Analysis'].apply(pd.Series)
-    result_df = pd.concat([df, analysis_df], axis=1).drop(columns=['Analysis'])
-    
-    # Save the result to a new CSV file
-    result_df.to_csv('analyzed_data.csv', index=False)
-    print("Analysis complete. Results saved to 'analyzed_data.csv'.")
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        st.write("Data Preview:", df.head())
+        
+        # Column selection
+        text_column = st.selectbox("Select the column containing text data", df.columns)
+        
+        # User input for words
+        cta_words = st.text_input("Enter CTA words separated by commas", "buy,subscribe,join,sign up,download").split(',')
+        salesy_words = st.text_input("Enter sales-y words separated by commas", "deal,offer,discount,exclusive,limited").split(',')
+        newsy_words = st.text_input("Enter news-y words separated by commas", "report,update,news,announcement,release").split(',')
+        custom_stopwords = st.text_input("Enter additional stop words separated by commas", "").split(',')
+        
+        # Combine custom stopwords with default NLTK stopwords
+        custom_stopwords = set(custom_stopwords) | set(stopwords.words('english'))
+        
+        # Initialize sentiment analyzer
+        sia = SentimentIntensityAnalyzer()
+        
+        # Apply the analysis to each row
+        df['Analysis'] = df[text_column].apply(lambda text: analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, sia))
+        
+        # Expand the analysis dictionary into separate columns
+        analysis_df = df['Analysis'].apply(pd.Series)
+        result_df = pd.concat([df, analysis_df], axis=1).drop(columns=['Analysis'])
+        
+        # Display the result
+        st.write("Analysis Result:", result_df.head())
+        
+        # Download button for the result
+        csv = result_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Download analysis as CSV",
+            data=csv,
+            file_name='analyzed_data.csv',
+            mime='text/csv',
+        )
 
 # Run the main function
 if __name__ == "__main__":

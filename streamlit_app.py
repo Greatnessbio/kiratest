@@ -11,18 +11,17 @@ import nltk
 
 # Function to download NLTK data if not already available
 def download_nltk_data():
-    try:
-        nltk.data.find('tokenizers/punkt')
-    except LookupError:
-        nltk.download('punkt')
-    try:
-        nltk.data.find('sentiment/vader_lexicon')
-    except LookupError:
-        nltk.download('vader_lexicon')
-    try:
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download('stopwords')
+    nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
+    if not os.path.exists(nltk_data_path):
+        os.makedirs(nltk_data_path)
+    nltk.data.path.append(nltk_data_path)
+    
+    resources = ['punkt', 'vader_lexicon', 'stopwords']
+    for resource in resources:
+        try:
+            nltk.data.find(f'{resource}')
+        except LookupError:
+            nltk.download(resource, download_dir=nltk_data_path)
 
 # Download NLTK data
 download_nltk_data()

@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from textstat import textstat
 from collections import Counter
@@ -7,6 +8,24 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from textblob import TextBlob
 import streamlit as st
 import nltk
+
+# Function to download NLTK data if not already available
+def download_nltk_data():
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        nltk.download('punkt')
+    try:
+        nltk.data.find('sentiment/vader_lexicon')
+    except LookupError:
+        nltk.download('vader_lexicon')
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords')
+
+# Download NLTK data
+download_nltk_data()
 
 # Function to analyze a single row of text
 def analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, sia):
@@ -64,12 +83,8 @@ def main():
         newsy_words = st.text_input("Enter news-y words separated by commas", "report,update,news,announcement,release").split(',')
         custom_stopwords = st.text_input("Enter additional stop words separated by commas", "").split(',')
         
-        try:
-            # Combine custom stopwords with default NLTK stopwords
-            custom_stopwords = set(custom_stopwords) | set(stopwords.words('english'))
-        except LookupError:
-            st.error("NLTK stopwords data not found. Please ensure the NLTK data is downloaded and available.")
-            return
+        # Combine custom stopwords with default NLTK stopwords
+        custom_stopwords = set(custom_stopwords) | set(stopwords.words('english'))
         
         # Initialize sentiment analyzer
         sia = SentimentIntensityAnalyzer()

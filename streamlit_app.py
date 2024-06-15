@@ -80,6 +80,7 @@ if uploaded_file is not None:
             results = []
             for text in text_input:
                 # Data Cleaning and Tokenization for the current text
+                stop_words = set(nltk.corpus.stopwords.words('english'))
                 tokens = word_tokenize(text)
                 filtered_tokens = [w for w in tokens if w.lower() not in stop_words and (w.isalnum() or '-' in w or "'" in w)]
                 cleaned_text = ' '.join(filtered_tokens)

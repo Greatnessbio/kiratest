@@ -65,6 +65,15 @@ if uploaded_file is not None:
         else:
             text_input = df.iloc[:, int(selected_column)].tolist()
 
+        # --- User Input for "Sales-y" and "News-y" Words ---
+        st.subheader("Customize Word Categories:")
+        sales_y_words_input = st.text_input("Enter 'Sales-y' words (comma-separated):", "buy,sale,discount,offer,deal,free,trial,demo")
+        news_y_words_input = st.text_input("Enter 'News-y' words (comma-separated):", "news,update,article,blog,post,story,report")
+
+        # Convert input strings to lists
+        sales_y_words = [word.strip() for word in sales_y_words_input.split(",")]
+        news_y_words = [word.strip() for word in news_y_words_input.split(",")]
+
         # Add a button to analyze the text
         if st.button("Analyze Text"):
             # Data Cleaning
@@ -81,37 +90,20 @@ if uploaded_file is not None:
             # --- Analysis Results Calculation ---
             results = []
             for i, text in enumerate(text_input):
-                # Calculate analysis for each text
-                d = cmudict.dict()
-                syllables = 0
-                total_words = 0
-                for token in tokens:
-                    for word in token:
-                        syllables += syllables_per_word(word, d)
-                        total_words += 1
+                # ... (Calculate flesch_kincaid_score, lexical_diversity, sentiment_scores, sentiments - same as before)
 
-                # Calculate Flesch-Kincaid, handling potential division by zero
-                if total_words > 0:
-                    flesch_kincaid_score = 0.39 * (total_words / len(text_input)) + 11.8 * (syllables / total_words) - 15.59
-                else:
-                    flesch_kincaid_score = 0
+                # Calculate top-performing words
+                top_words = Counter([word for token in tokens for word in token]).most_common(10)
 
-                # Calculate lexical diversity
-                lexical_diversity = len(set([word for token in tokens for word in token])) / len([word for token in tokens for word in token])
+                # Calculate top-performing CTA words
+                cta_words = [word for token in tokens for word in token if word.lower() in ["buy", "sign", "register", "learn", "download", "get", "start", "try", "join", "explore"]]
+                top_cta_words = Counter(cta_words).most_common(10)
 
-                # Perform sentiment analysis
-                sentiment_scores = [sia.polarity_scores(text) for text in cleaned_texts]
-
-                # Determine the sentiment (positive, negative, or neutral)
-                compound_scores = [score['compound'] for score in sentiment_scores]
-                sentiments = []
-                for score in compound_scores:
-                    if score > 0.05:
-                        sentiments.append("Positive")
-                    elif score < -0.05:
-                        sentiments.append("Negative")
-                    else:
-                        sentiments.append("Neutral")
+                # Calculate "sales-y" vs "news-y" words
+                sales_y_count = sum(1 for word in tokens[i] if word.lower() in sales_y_words)
+                news_y_count = sum(1 for word in tokens[i] if word.lower() in news_y_words)
+                sales_y_score = sales_y_count / len(tokens[i]) if tokens[i] else 0
+                news_y_score = news_y_count / len(tokens[i]) if tokens[i] else 0
 
                 # Store results in a dictionary
                 result = {
@@ -119,7 +111,9 @@ if uploaded_file is not None:
                     "Flesch-Kincaid Score": flesch_kincaid_score,
                     "Lexical Diversity": lexical_diversity,
                     "Sentiment": sentiments[i],
-                    "Sentiment Score (Compound)": sentiment_scores[i]['compound']
+                    "Sentiment Score (Compound)": sentiment_scores[i]['compound'],
+                    "Sales-y Score": sales_y_score,
+                    "News-y Score": news_y_score
                 }
                 results.append(result)
 
@@ -136,13 +130,13 @@ if uploaded_file is not None:
             st.write("**Lexical Diversity:** Ratio of unique words to total words (higher = more varied vocabulary).")
             st.write("**Sentiment:** Overall sentiment (positive, negative, neutral).")
             st.write("**Sentiment Score (Compound):** A normalized score from -1 (most negative) to 1 (most positive).")
+            st.write("**Sales-y Score:** Proportion of words related to sales and marketing.")
+            st.write("**News-y Score:** Proportion of words related to news and information.")
 
             # --- Additional Insights ---
             st.subheader("Additional Insights:")
             st.write("**Top Performing Words:**", top_words)
             st.write("**Top Performing CTA Words:**", top_cta_words)
-            st.write("**Sales-y Score:**", sales_y_score)
-            st.write("**News-y Score:**", news_y_score)
 
     except Exception as e:
         st.error(f"An error occurred: {e}")

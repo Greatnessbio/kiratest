@@ -99,9 +99,9 @@ if uploaded_file is not None:
                     syllables += syllables_per_word(word, d)
                     total_words += 1
 
-                # Calculate Flesch-Kincaid Score (INSIDE THE INNER LOOP)
+                # Calculate Flesch-Kincaid Score (CORRECTED FORMULA)
                 if total_words > 0:
-                    flesch_kincaid_score = 0.39 * (total_words / len(tokens[i])) + 11.8 * (syllables / total_words) - 15.59
+                    flesch_kincaid_score = 0.39 * (len(tokens[i]) / len(sent_tokenize(text))) + 11.8 * (syllables / total_words) - 15.59
                 else:
                     flesch_kincaid_score = 0
 

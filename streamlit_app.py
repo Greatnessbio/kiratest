@@ -57,4 +57,23 @@ def main():
     
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
-    if uploaded_file is not None
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        
+        # Assuming the text column is named 'text'
+        text_column = 'text'
+        if text_column not in df.columns:
+            st.error("The CSV file must contain a column named 'text'.")
+            return
+        
+        cta_words = ['call', 'action', 'now', 'today', 'limited', 'time', 'offer']
+        salesy_words = ['buy', 'sale', 'discount', 'free', 'trial']
+        newsy_words = ['new', 'update', 'release', 'launch', 'breaking']
+        custom_stopwords = set(stopwords.words('english'))
+        
+        results = df[text_column].apply(lambda x: analyze_text(x, cta_words, salesy_words, newsy_words, custom_stopwords, sia))
+        
+        st.write(results)
+
+if __name__ == "__main__":
+    main()

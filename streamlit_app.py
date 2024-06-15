@@ -90,7 +90,37 @@ if uploaded_file is not None:
             # --- Analysis Results Calculation ---
             results = []
             for i, text in enumerate(text_input):
-                # ... (Calculate flesch_kincaid_score, lexical_diversity, sentiment_scores, sentiments - same as before)
+                # Calculate analysis for each text
+                d = cmudict.dict()
+                syllables = 0
+                total_words = 0
+                for token in tokens:
+                    for word in token:
+                        syllables += syllables_per_word(word, d)
+                        total_words += 1
+
+                # Calculate Flesch-Kincaid Score (INSIDE THE LOOP)
+                if total_words > 0:
+                    flesch_kincaid_score = 0.39 * (total_words / len(text_input)) + 11.8 * (syllables / total_words) - 15.59
+                else:
+                    flesch_kincaid_score = 0
+
+                # Calculate lexical diversity
+                lexical_diversity = len(set([word for token in tokens for word in token])) / len([word for token in tokens for word in token])
+
+                # Perform sentiment analysis
+                sentiment_scores = [sia.polarity_scores(text) for text in cleaned_texts]
+
+                # Determine the sentiment (positive, negative, or neutral)
+                compound_scores = [score['compound'] for score in sentiment_scores]
+                sentiments = []
+                for score in compound_scores:
+                    if score > 0.05:
+                        sentiments.append("Positive")
+                    elif score < -0.05:
+                        sentiments.append("Negative")
+                    else:
+                        sentiments.append("Neutral")
 
                 # Calculate top-performing words
                 top_words = Counter([word for token in tokens for word in token]).most_common(10)

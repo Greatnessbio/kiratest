@@ -8,6 +8,7 @@ from nltk.probability import FreqDist
 from collections import Counter
 import re
 import csv
+import matplotlib.pyplot as plt
 
 # Specify the path to the nltk_data directory
 nltk.data.path.append('./nltk_data')
@@ -79,52 +80,56 @@ if uploaded_file is not None:
             # --- Analysis Results Calculation (ALL CALCULATIONS INSIDE THE LOOP) ---
             results = []
             for text in text_input:
-                # Data Cleaning and Tokenization for the current text
-                stop_words = set(nltk.corpus.stopwords.words('english'))
-                tokens = word_tokenize(text)
-                filtered_tokens = [w for w in tokens if w.lower() not in stop_words and (w.isalnum() or '-' in w or "'" in w)]
-                cleaned_text = ' '.join(filtered_tokens)
+                try:
+                    # Data Cleaning and Tokenization for the current text
+                    stop_words = set(nltk.corpus.stopwords.words('english'))
+                    tokens = word_tokenize(text)
+                    filtered_tokens = [w for w in tokens if w.lower() not in stop_words and (w.isalnum() or '-' in w or "'" in w)]
+                    cleaned_text = ' '.join(filtered_tokens)
 
-                # Calculate analysis for the current text
-                d = cmudict.dict()
-                syllables = 0
-                total_words = 0  # Reset total_words for each text
+                    # Calculate analysis for the current text
+                    d = cmudict.dict()
+                    syllables = 0
+                    total_words = 0  # Reset total_words for each text
 
-                for word in filtered_tokens:
-                    syllables += syllables_per_word(word, d)
-                    total_words += 1
+                    for word in filtered_tokens:
+                        syllables += syllables_per_word(word, d)
+                        total_words += 1
 
-                # Calculate Flesch-Kincaid Score
-                total_sentences = len(sent_tokenize(cleaned_text))
-                if total_words > 0:
-                    flesch_kincaid_score = 0.39 * (total_words / total_sentences) + 11.8 * (syllables / total_words) - 15.59
-                else:
-                    flesch_kincaid_score = 0
+                    # Calculate Flesch-Kincaid Score
+                    total_sentences = len(sent_tokenize(cleaned_text))
+                    if total_words > 0:
+                        flesch_kincaid_score = 0.39 * (total_words / total_sentences) + 11.8 * (syllables / total_words) - 15.59
+                    else:
+                        flesch_kincaid_score = 0
 
-                # Calculate lexical diversity
-                lexical_diversity = len(set(filtered_tokens)) / len(filtered_tokens) if filtered_tokens else 0
+                    # Calculate lexical diversity
+                    lexical_diversity = len(set(filtered_tokens)) / len(filtered_tokens) if filtered_tokens else 0
 
-                # Perform sentiment analysis on cleaned text
-                sentiment_score = sia.polarity_scores(cleaned_text)
-                sentiment = "Positive" if sentiment_score['compound'] > 0.05 else "Negative" if sentiment_score['compound'] < -0.05 else "Neutral"
+                    # Perform sentiment analysis on cleaned text
+                    sentiment_score = sia.polarity_scores(cleaned_text)
+                    sentiment = "Positive" if sentiment_score['compound'] > 0.05 else "Negative" if sentiment_score['compound'] < -0.05 else "Neutral"
 
-                # Calculate "sales-y" vs "news-y" words
-                sales_y_count = sum(1 for word in filtered_tokens if word.lower() in sales_y_words)
-                news_y_count = sum(1 for word in filtered_tokens if word.lower() in news_y_words)
-                sales_y_score = sales_y_count / total_words if total_words > 0 else 0
-                news_y_score = news_y_count / total_words if total_words > 0 else 0
+                    # Calculate "sales-y" vs "news-y" words
+                    sales_y_count = sum(1 for word in filtered_tokens if word.lower() in sales_y_words)
+                    news_y_count = sum(1 for word in filtered_tokens if word.lower() in news_y_words)
+                    sales_y_score = sales_y_count / total_words if total_words > 0 else 0
+                    news_y_score = news_y_count / total_words if total_words > 0 else 0
 
-                # Store results in a dictionary
-                result = {
-                    "Original Text": text,
-                    "Flesch-Kincaid Score": flesch_kincaid_score,
-                    "Lexical Diversity": lexical_diversity,
-                    "Sentiment": sentiment,
-                    "Sentiment Score (Compound)": sentiment_score['compound'],
-                    "Sales-y Score": sales_y_score,
-                    "News-y Score": news_y_score
-                }
-                results.append(result)
+                    # Store results in a dictionary
+                    result = {
+                        "Original Text": text,
+                        "Flesch-Kincaid Score": flesch_kincaid_score,
+                        "Lexical Diversity": lexical_diversity,
+                        "Sentiment": sentiment,
+                        "Sentiment Score (Compound)": sentiment_score['compound'],
+                        "Sales-y Score": sales_y_score,
+                        "News-y Score": news_y_score
+                    }
+                    results.append(result)
+                except ZeroDivisionError as e:
+                    st.error(f"Error calculating scores for text: {text}. {e}")
+                    continue  # Skip to the next text
 
             # Create a DataFrame from the results list
             results_df = pd.DataFrame(results)
@@ -146,9 +151,30 @@ if uploaded_file is not None:
             st.subheader("Additional Insights:")
             top_words = Counter([word for sublist in tokens for word in sublist]).most_common(10)
             st.write("**Top Performing Words:**", top_words)
+
+            # Bar chart for top words
+            fig, ax = plt.subplots()
+            ax.bar([word[0] for word in top_words], [word[1] for word in top_words])
+            ax.set_xlabel("Words")
+            ax.set_ylabel("Frequency")
+            ax.set_title("Top 10 Words")
+            st.pyplot(fig)
+
             cta_words = [word for sublist in tokens for word in sublist if word.lower() in ["buy", "sign", "register", "learn", "download", "get", "start", "try", "join", "explore"]]
             top_cta_words = Counter(cta_words).most_common(10)
             st.write("**Top Performing CTA Words:**", top_cta_words)
 
+            # Bar chart for top CTA words
+            fig, ax = plt.subplots()
+            ax.bar([word[0] for word in top_cta_words], [word[1] for word in top_cta_words])
+            ax.set_xlabel("CTA Words")
+            ax.set_ylabel("Frequency")
+            ax.set_title("Top 10 CTA Words")
+            st.pyplot(fig)
+
+    except (FileNotFoundError, pd.errors.EmptyDataError) as e:
+        st.error(f"Error reading CSV file: {e}")
+    except KeyError as e:
+        st.error(f"Error selecting column: {e}")
     except Exception as e:
         st.error(f"An error occurred: {e}")

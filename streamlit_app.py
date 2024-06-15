@@ -44,15 +44,15 @@ if uploaded_file is not None:
         tokens = [word_tokenize(text) for text in text_input]
 
         # Calculate the Flesch-Kincaid score
-        syllables = 0
         d = cmudict.dict()
+        syllables = 0
         for token in tokens:
             for word in token:
                 try:
                     syllables += [len(list(y for y in x if y[-1].isdigit())) for x in d[word.lower()]][0]
                 except KeyError:
                     syllables += syllables_per_word(word, d)
-        flesch_kincaid_score = 0.39 * (len(tokens) / len(re.split('[.!?]', ' '.join(text_input)))) + 0.11 * (syllables / len(tokens))
+        flesch_kincaid_score = 0.39 * (len(tokens) / len(re.split('[.!?]', ' '.join(text_input)))) + 0.11 * (syllables / len([word for token in tokens for word in token]))
         st.write("Flesch-Kincaid Score:", flesch_kincaid_score)
 
         # Calculate lexical diversity

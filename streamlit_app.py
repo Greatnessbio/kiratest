@@ -76,15 +76,16 @@ if uploaded_file is not None:
 
         # Add a button to analyze the text
         if st.button("Analyze Text"):
-            # Data Cleaning
+            # Data Cleaning (MODIFIED)
             stop_words = set(nltk.corpus.stopwords.words('english'))
             cleaned_texts = []
             for text in text_input:
                 tokens = word_tokenize(text)
-                filtered_tokens = [w for w in tokens if w not in stop_words and w.isalnum()]
+                # Allow hyphens and apostrophes in words
+                filtered_tokens = [w for w in tokens if w not in stop_words and (w.isalnum() or '-' in w or "'" in w)]
                 cleaned_texts.append(' '.join(filtered_tokens))
 
-            # Tokenize the input text (MOVE THIS OUTSIDE THE LOOP)
+            # Tokenize the input text
             tokens = [word_tokenize(text) for text in cleaned_texts]
 
             # --- Analysis Results Calculation ---
@@ -101,20 +102,20 @@ if uploaded_file is not None:
                     syllables += syllables_per_word(word, d)
                     total_words += 1
 
-                # Calculate Flesch-Kincaid Score
+                # Calculate Flesch-Kincaid Score (CORRECTED FORMULA)
                 if total_words > 0:
                     flesch_kincaid_score = 0.39 * (len(current_tokens) / len(sent_tokenize(text))) + 11.8 * (syllables / total_words) - 15.59
                 else:
                     flesch_kincaid_score = 0
 
-                # Calculate lexical diversity
+                # Calculate lexical diversity (USING CURRENT TOKENS)
                 lexical_diversity = len(set(current_tokens)) / len(current_tokens) if current_tokens else 0
 
-                # Perform sentiment analysis
+                # Perform sentiment analysis (ON ORIGINAL TEXT)
                 sentiment_score = sia.polarity_scores(text)
                 sentiment = "Positive" if sentiment_score['compound'] > 0.05 else "Negative" if sentiment_score['compound'] < -0.05 else "Neutral"
 
-                # Calculate "sales-y" vs "news-y" words
+                # Calculate "sales-y" vs "news-y" words (USING CURRENT TOKENS)
                 sales_y_count = sum(1 for word in current_tokens if word.lower() in sales_y_words)
                 news_y_count = sum(1 for word in current_tokens if word.lower() in news_y_words)
                 sales_y_score = sales_y_count / len(current_tokens) if current_tokens else 0

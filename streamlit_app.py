@@ -93,43 +93,26 @@ if uploaded_file is not None:
                 # Calculate analysis for each text
                 d = cmudict.dict()
                 syllables = 0
-                total_words = 0
-                for token in tokens:
-                    for word in token:
-                        syllables += syllables_per_word(word, d)
-                        total_words += 1
+                total_words = 0 
 
-                # Calculate Flesch-Kincaid Score (INSIDE THE LOOP)
+                for word in tokens[i]:  # Iterate through tokens of each text
+                    syllables += syllables_per_word(word, d)
+                    total_words += 1
+
+                # Calculate Flesch-Kincaid Score (INSIDE THE INNER LOOP)
                 if total_words > 0:
-                    flesch_kincaid_score = 0.39 * (total_words / len(text_input)) + 11.8 * (syllables / total_words) - 15.59
+                    flesch_kincaid_score = 0.39 * (total_words / len(tokens[i])) + 11.8 * (syllables / total_words) - 15.59 
                 else:
                     flesch_kincaid_score = 0
 
-                # Calculate lexical diversity
-                lexical_diversity = len(set([word for token in tokens for word in token])) / len([word for token in tokens for word in token])
+                # Calculate lexical diversity (INSIDE THE OUTER LOOP)
+                lexical_diversity = len(set(tokens[i])) / len(tokens[i]) if tokens[i] else 0
 
-                # Perform sentiment analysis
-                sentiment_scores = [sia.polarity_scores(text) for text in cleaned_texts]
+                # Perform sentiment analysis (INSIDE THE OUTER LOOP)
+                sentiment_score = sia.polarity_scores(text)
+                sentiment = "Positive" if sentiment_score['compound'] > 0.05 else "Negative" if sentiment_score['compound'] < -0.05 else "Neutral"
 
-                # Determine the sentiment (positive, negative, or neutral)
-                compound_scores = [score['compound'] for score in sentiment_scores]
-                sentiments = []
-                for score in compound_scores:
-                    if score > 0.05:
-                        sentiments.append("Positive")
-                    elif score < -0.05:
-                        sentiments.append("Negative")
-                    else:
-                        sentiments.append("Neutral")
-
-                # Calculate top-performing words
-                top_words = Counter([word for token in tokens for word in token]).most_common(10)
-
-                # Calculate top-performing CTA words
-                cta_words = [word for token in tokens for word in token if word.lower() in ["buy", "sign", "register", "learn", "download", "get", "start", "try", "join", "explore"]]
-                top_cta_words = Counter(cta_words).most_common(10)
-
-                # Calculate "sales-y" vs "news-y" words
+                # Calculate "sales-y" vs "news-y" words (INSIDE THE OUTER LOOP)
                 sales_y_count = sum(1 for word in tokens[i] if word.lower() in sales_y_words)
                 news_y_count = sum(1 for word in tokens[i] if word.lower() in news_y_words)
                 sales_y_score = sales_y_count / len(tokens[i]) if tokens[i] else 0
@@ -140,8 +123,8 @@ if uploaded_file is not None:
                     "Original Text": text,
                     "Flesch-Kincaid Score": flesch_kincaid_score,
                     "Lexical Diversity": lexical_diversity,
-                    "Sentiment": sentiments[i],
-                    "Sentiment Score (Compound)": sentiment_scores[i]['compound'],
+                    "Sentiment": sentiment,
+                    "Sentiment Score (Compound)": sentiment_score['compound'],
                     "Sales-y Score": sales_y_score,
                     "News-y Score": news_y_score
                 }

@@ -9,9 +9,20 @@ from textblob import TextBlob
 import streamlit as st
 import nltk
 
-# Set the NLTK data path to the local directory
-nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
-nltk.data.path.append(nltk_data_path)
+# Function to download the VADER lexicon
+def download_nltk_resources():
+    try:
+        # Check if the VADER lexicon is available
+        nltk.data.find('sentiment/vader_lexicon.zip')
+    except LookupError:
+        # Download the VADER lexicon
+        nltk.download('vader_lexicon')
+
+# Download NLTK resources
+download_nltk_resources()
+
+# Now initialize the SentimentIntensityAnalyzer
+sia = SentimentIntensityAnalyzer()
 
 # Function to analyze a single row of text
 def analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, sia):

@@ -8,18 +8,18 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from textblob import TextBlob
 import streamlit as st
 import nltk
-from pandas import json_normalize
+
+# Set the NLTK data path to the local directory
+nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'nltk_data'))
 
 # Function to download NLTK resources
 def download_nltk_resources():
-    try:
-        nltk.data.find('tokenizers/punkt')
-        nltk.data.find('sentiment/vader_lexicon')
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download('punkt')
-        nltk.download('vader_lexicon')
-        nltk.download('stopwords')
+    nltk_resources = ['tokenizers/punkt', 'sentiment/vader_lexicon', 'corpora/stopwords']
+    for resource in nltk_resources:
+        try:
+            nltk.data.find(resource)
+        except LookupError:
+            nltk.download(resource.split('/')[-1])
 
 # Download NLTK resources
 download_nltk_resources()
@@ -44,3 +44,17 @@ def analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, s
     return {
         'Flesch-Kincaid Score': fk_score,
         'Lexical Diversity': lexical_diversity,
+        'Top Words': top_words,
+        'CTA Words': cta_counts,
+        'Sentiment': sentiment,
+        'Sales-y Count': salesy_count,
+        'News-y Count': newsy_count
+    }
+
+# Main function to load data and perform analysis
+def main():
+    st.title("Text Analysis Tool")
+    
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+    
+    if uploaded_file is not None

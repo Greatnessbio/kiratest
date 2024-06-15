@@ -88,7 +88,7 @@ if uploaded_file is not None:
                 # Calculate analysis for the current text
                 d = cmudict.dict()
                 syllables = 0
-                total_words = 0
+                total_words = 0  # Reset total_words for each text
 
                 for word in filtered_tokens:
                     syllables += syllables_per_word(word, d)

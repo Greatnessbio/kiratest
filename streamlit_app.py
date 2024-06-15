@@ -2,7 +2,7 @@ import nltk
 import streamlit as st
 import pandas as pd
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize  # Import sent_tokenize
 from nltk.corpus import cmudict
 from nltk.probability import FreqDist
 from collections import Counter
@@ -99,20 +99,20 @@ if uploaded_file is not None:
                     syllables += syllables_per_word(word, d)
                     total_words += 1
 
-                # Calculate Flesch-Kincaid Score (CORRECTED FORMULA)
+                # Calculate Flesch-Kincaid Score
                 if total_words > 0:
                     flesch_kincaid_score = 0.39 * (len(tokens[i]) / len(sent_tokenize(text))) + 11.8 * (syllables / total_words) - 15.59
                 else:
                     flesch_kincaid_score = 0
 
-                # Calculate lexical diversity (INSIDE THE OUTER LOOP)
+                # Calculate lexical diversity
                 lexical_diversity = len(set(tokens[i])) / len(tokens[i]) if tokens[i] else 0
 
-                # Perform sentiment analysis (INSIDE THE OUTER LOOP)
+                # Perform sentiment analysis
                 sentiment_score = sia.polarity_scores(text)
                 sentiment = "Positive" if sentiment_score['compound'] > 0.05 else "Negative" if sentiment_score['compound'] < -0.05 else "Neutral"
 
-                # Calculate "sales-y" vs "news-y" words (INSIDE THE OUTER LOOP)
+                # Calculate "sales-y" vs "news-y" words
                 sales_y_count = sum(1 for word in tokens[i] if word.lower() in sales_y_words)
                 news_y_count = sum(1 for word in tokens[i] if word.lower() in news_y_words)
                 sales_y_score = sales_y_count / len(tokens[i]) if tokens[i] else 0

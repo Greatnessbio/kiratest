@@ -4,3 +4,4 @@ streamlit
 textstat
 nltk
 textblob
+matplotlib

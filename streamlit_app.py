@@ -95,16 +95,17 @@ if uploaded_file is not None:
                     total_words += 1
 
                 # Calculate Flesch-Kincaid Score
+                total_sentences = len(sent_tokenize(cleaned_text))
                 if total_words > 0:
-                    flesch_kincaid_score = 0.39 * (len(filtered_tokens) / len(sent_tokenize(text))) + 11.8 * (syllables / total_words) - 15.59
+                    flesch_kincaid_score = 0.39 * (total_words / total_sentences) + 11.8 * (syllables / total_words) - 15.59
                 else:
                     flesch_kincaid_score = 0
 
                 # Calculate lexical diversity
                 lexical_diversity = len(set(filtered_tokens)) / len(filtered_tokens) if filtered_tokens else 0
 
-                # Perform sentiment analysis
-                sentiment_score = sia.polarity_scores(text)
+                # Perform sentiment analysis on cleaned text
+                sentiment_score = sia.polarity_scores(cleaned_text)
                 sentiment = "Positive" if sentiment_score['compound'] > 0.05 else "Negative" if sentiment_score['compound'] < -0.05 else "Neutral"
 
                 # Calculate "sales-y" vs "news-y" words

@@ -93,7 +93,7 @@ if uploaded_file is not None:
                 # Calculate analysis for each text
                 d = cmudict.dict()
                 syllables = 0
-                total_words = 0 
+                total_words = 0
 
                 for word in tokens[i]:  # Iterate through tokens of each text
                     syllables += syllables_per_word(word, d)
@@ -101,7 +101,7 @@ if uploaded_file is not None:
 
                 # Calculate Flesch-Kincaid Score (INSIDE THE INNER LOOP)
                 if total_words > 0:
-                    flesch_kincaid_score = 0.39 * (total_words / len(tokens[i])) + 11.8 * (syllables / total_words) - 15.59 
+                    flesch_kincaid_score = 0.39 * (total_words / len(tokens[i])) + 11.8 * (syllables / total_words) - 15.59
                 else:
                     flesch_kincaid_score = 0
 
@@ -148,7 +148,10 @@ if uploaded_file is not None:
 
             # --- Additional Insights ---
             st.subheader("Additional Insights:")
+            top_words = Counter([word for sublist in tokens for word in sublist]).most_common(10)
             st.write("**Top Performing Words:**", top_words)
+            cta_words = [word for sublist in tokens for word in sublist if word.lower() in ["buy", "sign", "register", "learn", "download", "get", "start", "try", "join", "explore"]]
+            top_cta_words = Counter(cta_words).most_common(10)
             st.write("**Top Performing CTA Words:**", top_cta_words)
 
     except Exception as e:

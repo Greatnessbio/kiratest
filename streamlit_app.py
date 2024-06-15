@@ -10,7 +10,8 @@ import streamlit as st
 import nltk
 
 # Set the NLTK data path to the local directory
-nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'nltk_data'))
+nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
+nltk.data.path.append(nltk_data_path)
 
 # Function to analyze a single row of text
 def analyze_text(text, cta_words, salesy_words, newsy_words, custom_stopwords, sia):

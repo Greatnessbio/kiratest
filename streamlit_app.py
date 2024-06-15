@@ -40,13 +40,16 @@ if uploaded_file is not None:
         # Read the CSV file
         df = pd.read_csv(uploaded_file)
 
-        # Ask the user if they want to use the header row
-        use_header = st.checkbox("Use header row")
+        # Display CSV preview
+        st.subheader("CSV Data Preview:")
+        st.write(df.head())
 
-        if use_header:
-            text_input = df.iloc[:, 0].tolist()  # Convert to list
-        else:
-            text_input = df.iloc[:, 0].apply(lambda x: x.lower()).tolist()  # Convert to list
+        # Get column names for dropdown
+        column_names = list(df.columns)
+        selected_column = st.selectbox("Select the text column:", column_names)
+
+        # Use the selected column for text input
+        text_input = df[selected_column].tolist()
 
         # Add a button to analyze the text
         if st.button("Analyze Text"):
@@ -74,11 +77,50 @@ if uploaded_file is not None:
             if total_words > 0:
                 flesch_kincaid_score = 0.39 * (total_words / len(text_input)) + 11.8 * (syllables / total_words) - 15.59
             else:
-                flesch_kincaid_score = 0  # Or assign a suitable value when there are no words
+                flesch_kincaid_score = 0 
 
             st.write("Flesch-Kincaid Score:", flesch_kincaid_score)
 
-            # ... (rest of your code - lexical diversity, sentiment analysis, etc.)
+            # Calculate lexical diversity
+            lexical_diversity = len(set([word for token in tokens for word in token])) / len([word for token in tokens for word in token])
+            st.write("Lexical Diversity:", lexical_diversity)
+
+            # Calculate top-performing words
+            top_words = Counter([word for token in tokens for word in token]).most_common(10)
+            st.write("Top-performing Words:")
+            st.write(top_words)
+
+            # Calculate top-performing CTA words
+            cta_words = [word for token in tokens for word in token if word.lower() in ["buy", "sign", "register", "learn", "download", "get", "start", "try", "join", "explore"]]
+            top_cta_words = Counter(cta_words).most_common(10)
+            st.write("Top-performing CTA Words:")
+            st.write(top_cta_words)
+
+            # Perform sentiment analysis
+            sentiment_scores = [sia.polarity_scores(text) for text in cleaned_texts]
+            st.write("Sentiment Scores:")
+            st.write(sentiment_scores)
+
+            # Determine the sentiment (positive, negative, or neutral)
+            compound_scores = [score['compound'] for score in sentiment_scores]
+            sentiments = []
+            for score in compound_scores:
+                if score > 0.05:
+                    sentiments.append("Positive")
+                elif score < -0.05:
+                    sentiments.append("Negative")
+                else:
+                    sentiments.append("Neutral")
+            st.write("Sentiments:")
+            st.write(sentiments)
+
+            # Calculate "sales-y" vs "news-y" words
+            sales_y_words = [word for token in tokens for word in token if word.lower() in ["buy", "sale", "discount", "offer", "deal", "free", "trial", "demo"]]
+            news_y_words = [word for token in tokens for word in token if word.lower() in ["news", "update", "article", "blog", "post", "story", "report"]]
+            sales_y_score = len(sales_y_words) / len([word for token in tokens for word in token])
+            news_y_score = len(news_y_words) / len([word for token in tokens for word in token])
+            st.write("Sales-y Score:", sales_y_score)
+            st.write("News-y Score:", news_y_score)
 
     except Exception as e:
         st.error(f"An error occurred: {e}")

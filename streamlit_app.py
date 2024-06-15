@@ -37,19 +37,33 @@ def syllables_per_word(word, d):
 
 if uploaded_file is not None:
     try:
+        # Ask the user if the CSV has a header
+        has_header = st.checkbox("CSV file has header row")
+
         # Read the CSV file
-        df = pd.read_csv(uploaded_file)
+        if has_header:
+            df = pd.read_csv(uploaded_file)
+        else:
+            df = pd.read_csv(uploaded_file, header=None)  # No header
 
         # Display CSV preview
         st.subheader("CSV Data Preview:")
         st.write(df.head())
 
-        # Get column names for dropdown
-        column_names = list(df.columns)
-        selected_column = st.selectbox("Select the text column:", column_names)
+        # Get column names or indices for dropdown
+        if has_header:
+            column_options = list(df.columns)
+        else:
+            column_options = [str(i) for i in range(len(df.columns))]
+
+        # Dropdown for column selection
+        selected_column = st.selectbox("Select the text column:", column_options)
 
         # Use the selected column for text input
-        text_input = df[selected_column].tolist()
+        if has_header:
+            text_input = df[selected_column].tolist()
+        else:
+            text_input = df.iloc[:, int(selected_column)].tolist()
 
         # Add a button to analyze the text
         if st.button("Analyze Text"):
@@ -77,7 +91,7 @@ if uploaded_file is not None:
             if total_words > 0:
                 flesch_kincaid_score = 0.39 * (total_words / len(text_input)) + 11.8 * (syllables / total_words) - 15.59
             else:
-                flesch_kincaid_score = 0 
+                flesch_kincaid_score = 0  
 
             st.write("Flesch-Kincaid Score:", flesch_kincaid_score)
 

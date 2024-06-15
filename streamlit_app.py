@@ -1,9 +1,37 @@
+import nltk
+import streamlit as st
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk.tokenize import word_tokenize
+from nltk.corpus import cmudict
+from nltk.probability import FreqDist
+from collections import Counter
+import re
+
+# Specify the path to the nltk_data directory
+nltk.data.path.append('./nltk_data')
+
+# Download the required NLTK resources
+nltk.download('vader_lexicon')
+nltk.download('cmudict')
+nltk.download('punkt')
+
+# Load the vader_lexicon resource
+sia = SentimentIntensityAnalyzer()
+
+# Create a Streamlit app
+st.title("Text Analysis App")
+
+# Add a text input field
+text_input = st.text_input("Enter some text:")
+
+# Add a button to analyze the text
 if st.button("Analyze Text"):
     # Tokenize the input text
     tokens = word_tokenize(text_input)
 
     # Calculate the Flesch-Kincaid score
     syllables = 0
+    d = cmudict.dict()
     for word in tokens:
         try:
             syllables += [len(list(y for y in x if y[-1].isdigit())) for x in d[word.lower()]][0]
@@ -48,3 +76,8 @@ if st.button("Analyze Text"):
     news_y_score = len(news_y_words) / len(tokens)
     st.write("Sales-y Score:", sales_y_score)
     st.write("News-y Score:", news_y_score)
+
+def syllables_per_word(word):
+    return [len(list(y for y in x if y[-1].isdigit())) for x in d[word.lower()]]
+
+d = cmudict.dict()

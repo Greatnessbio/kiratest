@@ -154,6 +154,9 @@ if uploaded_file is not None:
         st.bar_chart(sentiment_df)
         
         st.write('### Top Words Word Cloud:')
+        # Debugging: Print total CTA counts
+        st.write('Total CTA Counts:', total_cta_counts)
+        
         wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(total_cta_counts)
         plt.figure(figsize=(10, 5))
         plt.imshow(wordcloud, interpolation='bilinear')

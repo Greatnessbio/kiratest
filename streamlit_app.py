@@ -15,7 +15,11 @@ def new_dale_chall(text):
     return textstat.dale_chall_readability_score(text)
 
 def smog_index(text):
-    return textstat.smog_index(text)
+    # Check if the text has enough sentences and polysyllabic words
+    if len(nltk.sent_tokenize(text)) >= 3 and any(len(nltk.word_tokenize(word)) >= 3 for word in nltk.word_tokenize(text)):
+        return textstat.smog_index(text)
+    else:
+        return 0.0
 
 # Add other readability metrics as needed
 

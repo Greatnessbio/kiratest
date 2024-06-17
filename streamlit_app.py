@@ -75,6 +75,10 @@ if uploaded_file is not None:
             # SMOG Index
             smog_score = smog_index(text_data)
             
+            # Debugging: Print text data and SMOG index
+            st.write(f"Text Data: {text_data}")
+            st.write(f"SMOG Index: {smog_score}")
+            
             # Lexical diversity
             words = nltk.word_tokenize(text_data.lower())
             lexical_diversity = len(set(words)) / len(words) if words else 0

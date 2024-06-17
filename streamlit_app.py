@@ -70,9 +70,9 @@ if uploaded_file is not None:
             'Row': [index],
             'Flesch-Kincaid Score': [flesch_kincaid_score],
             'Lexical Diversity': [lexical_diversity],
-            'Top Words': [top_words],
-            'Sentiment': [sentiment],
-            'Top CTA Words': [cta_word_counts],
+            'Top Words': [str(top_words)],
+            'Sentiment': [str(sentiment)],
+            'Top CTA Words': [str(cta_word_counts)],
             'Sales-y Words Count': [salesy_count],
             'News-y Words Count': [newsy_count]
         })
@@ -96,3 +96,4 @@ if uploaded_file is not None:
     st.write('### Charts:')
     st.bar_chart(results[['Flesch-Kincaid Score', 'Lexical Diversity', 'Sales-y Words Count', 'News-y Words Count']])
     st.line_chart(results[['Sentiment']])
+

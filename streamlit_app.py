@@ -84,13 +84,13 @@ if uploaded_file is not None:
     
     # Provide explanations
     st.write('### Explanations:')
-    st.write('**Flesch-Kincaid Score:** A readability test designed to indicate how difficult a passage in English is to understand. The score is typically between 0 and 12, with higher scores indicating more difficult text.')
-    st.write('**Lexical Diversity:** A measure of how many different words are used in the text. It is calculated as the ratio of unique words to the total number of words.')
-    st.write('**Top Words:** The most frequently occurring words in the text.')
-    st.write('**Sentiment Analysis:** An assessment of the emotional tone of the text. The sentiment score ranges from -1 (very negative) to 1 (very positive).')
-    st.write('**Top CTA Words:** The most frequently occurring call-to-action words in the text.')
-    st.write('**Sales-y Words Count:** The number of words in the text that are typically associated with sales language.')
-    st.write('**News-y Words Count:** The number of words in the text that are typically associated with news language.')
+    st.write('**Flesch-Kincaid Score:** A readability test designed to indicate how difficult a passage in English is to understand. The score is typically between 0 and 12, with higher scores indicating more difficult text. A score of 8-10 is considered fairly difficult, while a score of 12 is very difficult.')
+    st.write('**Lexical Diversity:** A measure of how many different words are used in the text. It is calculated as the ratio of unique words to the total number of words. A higher ratio indicates a more diverse vocabulary.')
+    st.write('**Top Words:** The most frequently occurring words in the text. This helps identify common themes or topics.')
+    st.write('**Sentiment Analysis:** An assessment of the emotional tone of the text. The sentiment score ranges from -1 (very negative) to 1 (very positive). A score close to 0 indicates neutral sentiment.')
+    st.write('**Top CTA Words:** The most frequently occurring call-to-action words in the text. These words are often used to encourage readers to take specific actions.')
+    st.write('**Sales-y Words Count:** The number of words in the text that are typically associated with sales language. A higher count indicates a more promotional tone.')
+    st.write('**News-y Words Count:** The number of words in the text that are typically associated with news language. A higher count indicates a more informational tone.')
     
     # Display charts for better visualization
     st.write('### Charts:')

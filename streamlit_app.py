@@ -31,7 +31,7 @@ if uploaded_file is not None:
     
     # Create a new DataFrame to store the results
     results = pd.DataFrame(columns=[
-        'Row', 'Flesch-Kincaid Score', 'Lexical Diversity', 'Top Words', 
+        'Text', 'Flesch-Kincaid Score', 'Lexical Diversity', 'Top Words', 
         'Sentiment', 'Top CTA Words', 'Sales-y Words Count', 'News-y Words Count'
     ])
     
@@ -67,7 +67,7 @@ if uploaded_file is not None:
         
         # Append results to the DataFrame
         new_row = pd.DataFrame({
-            'Row': [index],
+            'Text': [text_data],
             'Flesch-Kincaid Score': [flesch_kincaid_score],
             'Lexical Diversity': [lexical_diversity],
             'Top Words': [str(top_words)],
@@ -84,10 +84,10 @@ if uploaded_file is not None:
     
     # Provide explanations
     st.write('### Explanations:')
-    st.write('**Flesch-Kincaid Score:** A readability test designed to indicate how difficult a passage in English is to understand.')
-    st.write('**Lexical Diversity:** A measure of how many different words are used in the text.')
+    st.write('**Flesch-Kincaid Score:** A readability test designed to indicate how difficult a passage in English is to understand. The score is typically between 0 and 12, with higher scores indicating more difficult text.')
+    st.write('**Lexical Diversity:** A measure of how many different words are used in the text. It is calculated as the ratio of unique words to the total number of words.')
     st.write('**Top Words:** The most frequently occurring words in the text.')
-    st.write('**Sentiment Analysis:** An assessment of the emotional tone of the text.')
+    st.write('**Sentiment Analysis:** An assessment of the emotional tone of the text. The sentiment score ranges from -1 (very negative) to 1 (very positive).')
     st.write('**Top CTA Words:** The most frequently occurring call-to-action words in the text.')
     st.write('**Sales-y Words Count:** The number of words in the text that are typically associated with sales language.')
     st.write('**News-y Words Count:** The number of words in the text that are typically associated with news language.')

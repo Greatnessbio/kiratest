@@ -96,4 +96,3 @@ if uploaded_file is not None:
     st.write('### Charts:')
     st.bar_chart(results[['Flesch-Kincaid Score', 'Lexical Diversity', 'Sales-y Words Count', 'News-y Words Count']])
     st.line_chart(results[['Sentiment']])
-

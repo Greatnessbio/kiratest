@@ -1,12 +1,11 @@
 import streamlit as st
 import pandas as pd
-import textstat
 import nltk
 from nltk.probability import FreqDist
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-import seaborn as sns
-from wordcloud import WordCloud  # Import the WordCloud class
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import textstat
 
 nltk.download('punkt')
 
@@ -26,15 +25,17 @@ if uploaded_file is not None:
     # Select column to process
     column = st.selectbox('Select column to process', df.columns)
     
-    # Checkbox to indicate if the CSV has headers
-    has_headers = st.checkbox('CSV has headers', value=True)
-    
     # User input for sales-y and news-y words
     salesy_words_input = st.text_area('Enter sales-y words (comma-separated)', 'buy,discount,offer,sale,deal,price,save,free,limited,exclusive')
     newsy_words_input = st.text_area('Enter news-y words (comma-separated)', 'report,news,update,announce,release,statement,coverage,headline,breaking,story')
     
     salesy_words = [word.strip() for word in salesy_words_input.split(',')]
     newsy_words = [word.strip() for word in newsy_words_input.split(',')]
+    
+    # Prefilled and editable CTA words
+    default_cta_words = 'buy,call,subscribe,join,register,order,book,shop,get,reserve'
+    cta_words_input = st.text_area('Enter CTA words (comma-separated)', default_cta_words)
+    cta_words = [word.strip() for word in cta_words_input.split(',')]
     
     # Generate Report button
     if st.button('Generate Report'):
@@ -44,11 +45,12 @@ if uploaded_file is not None:
         # Create a new DataFrame to store the results
         results = pd.DataFrame(columns=[
             'Text', 'Flesch-Kincaid Score', 'Lexical Diversity', 'Top Words', 
-            'Sentiment', 'Top CTA Words', 'Sales-y Words Count', 'News-y Words Count'
+            'Neg Sentiment', 'Neu Sentiment', 'Pos Sentiment', 'Compound Sentiment', 'Final Sentiment',
+            'Top CTA Words', 'Sales-y Words Count', 'News-y Words Count'
         ])
         
-        # Define CTA words
-        cta_words = ['buy', 'call', 'subscribe', 'join', 'register', 'order', 'book', 'shop', 'get', 'reserve']
+        # Initialize total CTA counts
+        total_cta_counts = {word: 0 for word in cta_words}
         
         # Process each row
         for index, row in df.iterrows():
@@ -56,8 +58,6 @@ if uploaded_file is not None:
             
             # Flesch-Kincaid score
             flesch_kincaid_score = textstat.flesch_kincaid_grade(text_data)
-            if flesch_kincaid_score > 12:
-                flesch_kincaid_score = 12
             
             # Lexical diversity
             words = nltk.word_tokenize(text_data.lower())
@@ -69,9 +69,25 @@ if uploaded_file is not None:
             
             # Sentiment analysis
             sentiment = analyzer.polarity_scores(text_data)
+            neg_sentiment = sentiment['neg']
+            neu_sentiment = sentiment['neu']
+            pos_sentiment = sentiment['pos']
+            compound_sentiment = sentiment['compound']
+            
+            # Determine final sentiment
+            if compound_sentiment > 0.05:
+                final_sentiment = 'Positive'
+            elif compound_sentiment < -0.05:
+                final_sentiment = 'Negative'
+            else:
+                final_sentiment = 'Neutral'
             
             # Top-performing CTA words
             cta_word_counts = {word: words.count(word) for word in cta_words}
+            
+            # Update total CTA counts
+            for word, count in cta_word_counts.items():
+                total_cta_counts[word] += count
             
             # "Sales-y" vs "News-y" words
             salesy_count = sum(words.count(word) for word in salesy_words)
@@ -83,7 +99,11 @@ if uploaded_file is not None:
                 'Flesch-Kincaid Score': [flesch_kincaid_score],
                 'Lexical Diversity': [lexical_diversity],
                 'Top Words': [str(top_words)],
-                'Sentiment': [str(sentiment)],
+                'Neg Sentiment': [neg_sentiment],
+                'Neu Sentiment': [neu_sentiment],
+                'Pos Sentiment': [pos_sentiment],
+                'Compound Sentiment': [compound_sentiment],
+                'Final Sentiment': [final_sentiment],
                 'Top CTA Words': [str(cta_word_counts)],
                 'Sales-y Words Count': [salesy_count],
                 'News-y Words Count': [newsy_count]
@@ -110,12 +130,11 @@ if uploaded_file is not None:
         
         # Additional visualizations
         st.write('### Sentiment Distribution:')
-        sentiment_df = pd.DataFrame(results['Sentiment'].apply(eval).tolist())
+        sentiment_df = pd.DataFrame(results[['Neg Sentiment', 'Neu Sentiment', 'Pos Sentiment', 'Compound Sentiment']])
         st.bar_chart(sentiment_df)
         
         st.write('### Top Words Word Cloud:')
-        all_words = ' '.join(results['Text'])
-        wordcloud = WordCloud(width=800, height=400, background_color='white').generate(all_words)
+        wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(total_cta_counts)
         plt.figure(figsize=(10, 5))
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis('off')

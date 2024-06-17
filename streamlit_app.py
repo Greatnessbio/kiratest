@@ -168,8 +168,11 @@ if uploaded_file is not None or text_input:
         st.bar_chart(sentiment_df)
         
         st.write('### Top Words Word Cloud:')
-        wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(total_cta_counts)
-        plt.figure(figsize=(10, 5))
-        plt.imshow(wordcloud, interpolation='bilinear')
-        plt.axis('off')
-        st.pyplot(plt)
+        if any(total_cta_counts.values()):
+            wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(total_cta_counts)
+            plt.figure(figsize=(10, 5))
+            plt.imshow(wordcloud, interpolation='bilinear')
+            plt.axis('off')
+            st.pyplot(plt)
+        else:
+            st.write("No CTA words found in the text data to generate a word cloud.")

@@ -4,6 +4,8 @@ import textstat
 import nltk
 from nltk.probability import FreqDist
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 nltk.download('punkt')
 
@@ -57,7 +59,7 @@ if uploaded_file is not None:
                 flesch_kincaid_score = 12
             
             # Lexical diversity
-            words = nltk.word_tokenize(text_data)
+            words = nltk.word_tokenize(text_data.lower())
             lexical_diversity = len(set(words)) / len(words) if words else 0
             
             # Top-performing words
@@ -104,4 +106,16 @@ if uploaded_file is not None:
         # Display charts for better visualization
         st.write('### Charts:')
         st.bar_chart(results[['Flesch-Kincaid Score', 'Lexical Diversity', 'Sales-y Words Count', 'News-y Words Count']])
-
+        
+        # Additional visualizations
+        st.write('### Sentiment Distribution:')
+        sentiment_df = pd.DataFrame(results['Sentiment'].apply(eval).tolist())
+        st.bar_chart(sentiment_df)
+        
+        st.write('### Top Words Word Cloud:')
+        all_words = ' '.join(results['Text'])
+        wordcloud = WordCloud(width=800, height=400, background_color='white').generate(all_words)
+        plt.figure(figsize=(10, 5))
+        plt.imshow(wordcloud, interpolation='bilinear')
+        plt.axis('off')
+        st.pyplot(plt)

@@ -26,6 +26,13 @@ if uploaded_file is not None:
     # Checkbox to indicate if the CSV has headers
     has_headers = st.checkbox('CSV has headers', value=True)
     
+    # User input for sales-y and news-y words
+    salesy_words_input = st.text_area('Enter sales-y words (comma-separated)', 'buy,discount,offer,sale,deal,price,save,free,limited,exclusive')
+    newsy_words_input = st.text_area('Enter news-y words (comma-separated)', 'report,news,update,announce,release,statement,coverage,headline,breaking,story')
+    
+    salesy_words = [word.strip() for word in salesy_words_input.split(',')]
+    newsy_words = [word.strip() for word in newsy_words_input.split(',')]
+    
     # Initialize Sentiment Analyzer
     analyzer = SentimentIntensityAnalyzer()
     
@@ -35,10 +42,8 @@ if uploaded_file is not None:
         'Sentiment', 'Top CTA Words', 'Sales-y Words Count', 'News-y Words Count'
     ])
     
-    # Define CTA, sales-y, and news-y words
+    # Define CTA words
     cta_words = ['buy', 'call', 'subscribe', 'join', 'register', 'order', 'book', 'shop', 'get', 'reserve']
-    salesy_words = ['buy', 'discount', 'offer', 'sale', 'deal', 'price', 'save', 'free', 'limited', 'exclusive']
-    newsy_words = ['report', 'news', 'update', 'announce', 'release', 'statement', 'coverage', 'headline', 'breaking', 'story']
     
     # Process each row
     for index, row in df.iterrows():
@@ -46,6 +51,8 @@ if uploaded_file is not None:
         
         # Flesch-Kincaid score
         flesch_kincaid_score = textstat.flesch_kincaid_grade(text_data)
+        if flesch_kincaid_score > 12:
+            flesch_kincaid_score = 12
         
         # Lexical diversity
         words = nltk.word_tokenize(text_data)

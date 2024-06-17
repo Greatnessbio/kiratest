@@ -15,11 +15,7 @@ def new_dale_chall(text):
     return textstat.dale_chall_readability_score(text)
 
 def smog_index(text):
-    # Check if the text has enough sentences and polysyllabic words
-    if len(nltk.sent_tokenize(text)) >= 3 and any(len(nltk.word_tokenize(word)) >= 3 for word in nltk.word_tokenize(text)):
-        return textstat.smog_index(text)
-    else:
-        return 0.0
+    return textstat.smog_index(text)
 
 # Add other readability metrics as needed
 
@@ -78,10 +74,6 @@ if uploaded_file is not None:
             
             # SMOG Index
             smog_score = smog_index(text_data)
-            
-            # Debugging: Print text data and SMOG index
-            st.write(f"Text Data: {text_data}")
-            st.write(f"SMOG Index: {smog_score}")
             
             # Lexical diversity
             words = nltk.word_tokenize(text_data.lower())
@@ -162,9 +154,6 @@ if uploaded_file is not None:
         st.bar_chart(sentiment_df)
         
         st.write('### Top Words Word Cloud:')
-        # Debugging: Print total CTA counts
-        st.write('Total CTA Counts:', total_cta_counts)
-        
         wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(total_cta_counts)
         plt.figure(figsize=(10, 5))
         plt.imshow(wordcloud, interpolation='bilinear')

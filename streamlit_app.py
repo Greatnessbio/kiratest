@@ -66,20 +66,21 @@ if uploaded_file is not None:
         newsy_count = sum(words.count(word) for word in newsy_words)
         
         # Append results to the DataFrame
-        results = results.append({
-            'Row': index,
-            'Flesch-Kincaid Score': flesch_kincaid_score,
-            'Lexical Diversity': lexical_diversity,
-            'Top Words': top_words,
-            'Sentiment': sentiment,
-            'Top CTA Words': cta_word_counts,
-            'Sales-y Words Count': salesy_count,
-            'News-y Words Count': newsy_count
-        }, ignore_index=True)
+        new_row = pd.DataFrame({
+            'Row': [index],
+            'Flesch-Kincaid Score': [flesch_kincaid_score],
+            'Lexical Diversity': [lexical_diversity],
+            'Top Words': [top_words],
+            'Sentiment': [sentiment],
+            'Top CTA Words': [cta_word_counts],
+            'Sales-y Words Count': [salesy_count],
+            'News-y Words Count': [newsy_count]
+        })
+        results = pd.concat([results, new_row], ignore_index=True)
     
     # Display the results
     st.write('Analysis Results:')
-    st.write(results)
+    st.dataframe(results)
     
     # Provide explanations
     st.write('### Explanations:')
@@ -90,4 +91,8 @@ if uploaded_file is not None:
     st.write('**Top CTA Words:** The most frequently occurring call-to-action words in the text.')
     st.write('**Sales-y Words Count:** The number of words in the text that are typically associated with sales language.')
     st.write('**News-y Words Count:** The number of words in the text that are typically associated with news language.')
-
+    
+    # Display charts for better visualization
+    st.write('### Charts:')
+    st.bar_chart(results[['Flesch-Kincaid Score', 'Lexical Diversity', 'Sales-y Words Count', 'News-y Words Count']])
+    st.line_chart(results[['Sentiment']])

@@ -46,13 +46,19 @@ if uploaded_file is not None or text_input:
         text_data_list = [text_input]
     
     # User input for sales-y and news-y words
+    st.write('### Sales-y and News-y Words')
+    st.write('**Sales-y Words:** These are words typically associated with sales language, such as "buy," "discount," "offer," etc. A higher count of these words indicates a more promotional tone in the text. You can use the default list or customize it based on your specific needs.')
     salesy_words_input = st.text_area('Enter sales-y words (comma-separated)', 'buy,discount,offer,sale,deal,price,save,free,limited,exclusive')
+    
+    st.write('**News-y Words:** These are words typically associated with news language, such as "report," "news," "update," etc. A higher count of these words indicates a more informational tone in the text. You can use the default list or customize it based on your specific needs.')
     newsy_words_input = st.text_area('Enter news-y words (comma-separated)', 'report,news,update,announce,release,statement,coverage,headline,breaking,story')
     
     salesy_words = [word.strip() for word in salesy_words_input.split(',')]
     newsy_words = [word.strip() for word in newsy_words_input.split(',')]
     
     # Prefilled and editable CTA words
+    st.write('### Call-to-Action (CTA) Words')
+    st.write('**CTA Words:** These are words used to encourage readers to take specific actions, such as "buy," "call," "subscribe," etc. The default list includes common CTA words, but you can customize it based on the specific actions you want to analyze.')
     default_cta_words = 'buy,call,subscribe,join,register,order,book,shop,get,reserve'
     cta_words_input = st.text_area('Enter CTA words (comma-separated)', default_cta_words)
     cta_words = [word.strip() for word in cta_words_input.split(',')]

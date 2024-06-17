@@ -6,10 +6,9 @@ from nltk.probability import FreqDist
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import matplotlib.pyplot as plt
 import seaborn as sns
+from wordcloud import WordCloud  # Import the WordCloud class
 
-# Set NLTK data path or download silently
-nltk.data.path.append('./nltk_data')
-nltk.download('punkt', quiet=True)
+nltk.download('punkt')
 
 st.title('CSV File Analysis')
 

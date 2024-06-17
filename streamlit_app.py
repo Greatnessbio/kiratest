@@ -7,7 +7,17 @@ import matplotlib.pyplot as plt
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import textstat
 
+# Ensure necessary NLTK data is downloaded
 nltk.download('punkt')
+
+# Define functions for additional readability metrics
+def new_dale_chall(text):
+    return textstat.dale_chall_readability_score(text)
+
+def smog_index(text):
+    return textstat.smog_index(text)
+
+# Add other readability metrics as needed
 
 st.title('CSV File Analysis')
 
@@ -44,7 +54,7 @@ if uploaded_file is not None:
         
         # Create a new DataFrame to store the results
         results = pd.DataFrame(columns=[
-            'Text', 'Flesch-Kincaid Score', 'Lexical Diversity', 'Top Words', 
+            'Text', 'Flesch-Kincaid Score', 'New Dale-Chall', 'SMOG Index', 'Lexical Diversity', 'Top Words', 
             'Neg Sentiment', 'Neu Sentiment', 'Pos Sentiment', 'Compound Sentiment', 'Final Sentiment',
             'Top CTA Words', 'Sales-y Words Count', 'News-y Words Count'
         ])
@@ -58,6 +68,12 @@ if uploaded_file is not None:
             
             # Flesch-Kincaid score
             flesch_kincaid_score = textstat.flesch_kincaid_grade(text_data)
+            
+            # New Dale-Chall score
+            dale_chall_score = new_dale_chall(text_data)
+            
+            # SMOG Index
+            smog_score = smog_index(text_data)
             
             # Lexical diversity
             words = nltk.word_tokenize(text_data.lower())
@@ -97,6 +113,8 @@ if uploaded_file is not None:
             new_row = pd.DataFrame({
                 'Text': [text_data],
                 'Flesch-Kincaid Score': [flesch_kincaid_score],
+                'New Dale-Chall': [dale_chall_score],
+                'SMOG Index': [smog_score],
                 'Lexical Diversity': [lexical_diversity],
                 'Top Words': [str(top_words)],
                 'Neg Sentiment': [neg_sentiment],
@@ -117,6 +135,8 @@ if uploaded_file is not None:
         # Provide explanations
         st.write('### Explanations:')
         st.write('**Flesch-Kincaid Score:** A readability test designed to indicate how difficult a passage in English is to understand. The score is typically between 0 and 12, with higher scores indicating more difficult text. A score of 8-10 is considered fairly difficult, while a score of 12 is very difficult.')
+        st.write('**New Dale-Chall:** A readability formula that considers word difficulty and sentence length to assess text difficulty.')
+        st.write('**SMOG Index:** A readability formula that estimates the years of education needed to understand a piece of writing.')
         st.write('**Lexical Diversity:** A measure of how many different words are used in the text. It is calculated as the ratio of unique words to the total number of words. A higher ratio indicates a more diverse vocabulary.')
         st.write('**Top Words:** The most frequently occurring words in the text. This helps identify common themes or topics.')
         st.write('**Sentiment Analysis:** An assessment of the emotional tone of the text. The sentiment score ranges from -1 (very negative) to 1 (very positive). A score close to 0 indicates neutral sentiment.')
@@ -126,7 +146,7 @@ if uploaded_file is not None:
         
         # Display charts for better visualization
         st.write('### Charts:')
-        st.bar_chart(results[['Flesch-Kincaid Score', 'Lexical Diversity', 'Sales-y Words Count', 'News-y Words Count']])
+        st.bar_chart(results[['Flesch-Kincaid Score', 'New Dale-Chall', 'SMOG Index', 'Lexical Diversity', 'Sales-y Words Count', 'News-y Words Count']])
         
         # Additional visualizations
         st.write('### Sentiment Distribution:')

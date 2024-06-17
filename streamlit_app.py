@@ -7,7 +7,9 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-nltk.download('punkt')
+# Set NLTK data path or download silently
+nltk.data.path.append('./nltk_data')
+nltk.download('punkt', quiet=True)
 
 st.title('CSV File Analysis')
 

@@ -24,16 +24,26 @@ st.title('CSV File Analysis')
 # Upload CSV file
 uploaded_file = st.file_uploader('Upload a CSV file', type='csv')
 
-if uploaded_file is not None:
-    # Read the CSV file
-    df = pd.read_csv(uploaded_file)
-    
-    # Show preview of the CSV file
-    st.write('Preview of the CSV file:')
-    st.write(df.head())
-    
-    # Select column to process
-    column = st.selectbox('Select column to process', df.columns)
+# Text input for single text analysis
+text_input = st.text_area('Or paste text here for analysis')
+
+if uploaded_file is not None or text_input:
+    if uploaded_file is not None:
+        # Read the CSV file
+        df = pd.read_csv(uploaded_file)
+        
+        # Show preview of the CSV file
+        st.write('Preview of the CSV file:')
+        st.write(df.head())
+        
+        # Select column to process
+        column = st.selectbox('Select column to process', df.columns)
+        
+        # Extract text data from the selected column
+        text_data_list = df[column].astype(str).tolist()
+    else:
+        # Use the pasted text for analysis
+        text_data_list = [text_input]
     
     # User input for sales-y and news-y words
     salesy_words_input = st.text_area('Enter sales-y words (comma-separated)', 'buy,discount,offer,sale,deal,price,save,free,limited,exclusive')
@@ -62,10 +72,8 @@ if uploaded_file is not None:
         # Initialize total CTA counts
         total_cta_counts = {word: 0 for word in cta_words}
         
-        # Process each row
-        for index, row in df.iterrows():
-            text_data = str(row[column])
-            
+        # Process each text data
+        for text_data in text_data_list:
             # Flesch-Kincaid score
             flesch_kincaid_score = textstat.flesch_kincaid_grade(text_data)
             
@@ -136,7 +144,7 @@ if uploaded_file is not None:
         st.write('### Explanations:')
         st.write('**Flesch-Kincaid Score:** A readability test designed to indicate how difficult a passage in English is to understand. The score is typically between 0 and 12, with higher scores indicating more difficult text. A score of 8-10 is considered fairly difficult, while a score of 12 is very difficult.')
         st.write('**New Dale-Chall:** A readability formula that considers word difficulty and sentence length to assess text difficulty.')
-        st.write('**SMOG Index:** A readability formula that estimates the years of education needed to understand a piece of writing.')
+        st.write('**SMOG Index:** A readability formula that estimates the years of education needed to understand a piece of writing. The SMOG index specifically looks for polysyllabic words (words with three or more syllables) and requires a minimum number of sentences to generate a valid score. If the text is too short or lacks sufficient polysyllabic words, the SMOG index may return a score of 0.0. This indicates that the text is either very simple or does not meet the criteria for the SMOG formula to produce a meaningful score.')
         st.write('**Lexical Diversity:** A measure of how many different words are used in the text. It is calculated as the ratio of unique words to the total number of words. A higher ratio indicates a more diverse vocabulary.')
         st.write('**Top Words:** The most frequently occurring words in the text. This helps identify common themes or topics.')
         st.write('**Sentiment Analysis:** An assessment of the emotional tone of the text. The sentiment score ranges from -1 (very negative) to 1 (very positive). A score close to 0 indicates neutral sentiment.')
